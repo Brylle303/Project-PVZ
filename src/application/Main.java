@@ -1,92 +1,74 @@
 package application;
-	
+
 import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.stage.Stage;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import javafx.stage.Stage;
 
 
 public class Main extends Application {
-	
-	public static void main(String[] args) {
-		launch(args);
-	}
 
-	@Override
-	public void start(Stage stage) throws Exception {
-		
-		VBox root = new VBox(10); 
-		
-		//Group root = new Group();
-		Scene scene = new Scene(root,Color.LIGHTGREY);
-		Image icon = new Image("Assets/Logo.png");
-		Image title = new Image("Assets/Title Card.png");
-		ImageView viewTitle = new ImageView(title);
-		Text subtext = new Text();
-		     
-		stage.getIcons().add(icon);
-		stage.setTitle("Brylle JavaFX - v1.0");
-		
-		stage.setScene(scene);
-		stage.setWidth(700);
-		stage.setHeight(700);
-		stage.setResizable(false);
-		
-		//viewTitle.setX(120);
-		//viewTitle.setY(-90);
-		viewTitle.setFitWidth(700);   
-		viewTitle.setFitHeight(450);  
-		viewTitle.setPreserveRatio(true);
-		
-		Button spButton = new Button("SINGLEPLAYER");
-		spButton.setOnAction(e -> {
-            System.out.println("You are playing in SINGLEPLAYER");
-        });
-		
-		Button mpButton = new Button("MULTIPLAYER");
-		mpButton.setOnAction(e -> {
-            System.out.println("You are playing in MULTIPLAYER");
-        });
-		
-		Button exitButton = new Button("EXIT");
-		exitButton.setOnAction(e -> {
-            System.out.println("You have clicked the exit button");
-        });
-		
-		spButton.setPrefWidth(150);
-		spButton.setPrefHeight(60);
-		mpButton.setPrefWidth(150);
-		mpButton.setPrefHeight(60);
-		exitButton.setPrefWidth(150);
-		exitButton.setPrefHeight(60);
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage stage) {
+    	
+    	WavPlayer.play("src/Assets/MainMenuMusic.wav", true);
+    	String videoURL = getClass().getResource("/Assets/PVZ-Intro-NoMusic.mp4").toExternalForm(); 
+
+        WebView webView = new WebView();
+        WebEngine engine = webView.getEngine();
         
-        
-		subtext.setText("by Brylle");
-		//subtext.setX(270);
-		//subtext.setY(200);
-		subtext.setFont(Font.font("Times New Roman", 30));
-		
-		
-		VBox.setMargin(spButton, new Insets(30, 0, 0, 0));
-		VBox.setMargin(viewTitle, new Insets(70, 0, 0, 0));
-		root.setAlignment(Pos.TOP_CENTER);
-		root.getChildren().add(viewTitle);
-		root.getChildren().add(subtext);
-		root.getChildren().add(spButton);
-		root.getChildren().add(mpButton);
-		root.getChildren().add(exitButton);
-		
-		
-		stage.show();
-		
-	}
+        //Had to resort to using HTMML to play the intro video because JavaFX built-in media player is buggy
+        String html = "<html><body style='margin:0; background:black; overflow:hidden;'>"
+                + "<video width='100%' height='100%' autoplay onended='javaAppSkip()'>"
+                + "<source src='" + videoURL + "' type='video/mp4'>"
+                + "</video>"
+                + "<script>"
+                + "function javaAppSkip() { "
+                + "    alert('videoFinished'); "
+                + "} "
+                + "</script>"
+                + "</body></html>";
+
+        engine.loadContent(html);
+
+        webView.setPrefSize(1000, 600);
+
+        AnchorPane root = new AnchorPane(webView);
+        Scene scene = new Scene(root, 1000, 600);
+        Image icon = new Image(getClass().getResource("/Assets/Logo.png").toExternalForm());
+
+        stage.getIcons().add(icon);
+        stage.setTitle("PVZ Prototype v1.0");
+        stage.setScene(scene);
+        stage.setResizable(false);
+
+        Button skipButton = new Button("SKIP");
+        skipButton.setPrefWidth(60);
+        skipButton.setPrefHeight(30);
+        skipButton.setLayoutX(930);
+        skipButton.setLayoutY(10);
+
+        skipButton.setOnAction(e -> {
+        	
+        	scene.setRoot(MainMenu.getScreen(scene));
+        });
+
+        root.getChildren().add(skipButton);
+
+        engine.setOnAlert(event -> {
+            if ("videoFinished".equals(event.getData())) {
+            	scene.setRoot(MainMenu.getScreen(scene));
+            }
+        });
+
+        stage.show();
+    }
 }
