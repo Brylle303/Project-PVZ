@@ -10,10 +10,11 @@ import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
+import javafx.stage.Stage;
 
 public class MainMenu {
 	
-	public static AnchorPane getScreen(Scene scene) {
+	public static AnchorPane getScreen(Stage stage) {
 		
 		Image bgImage = new Image(MainMenu.class.getResource("/Assets/MainMenu-Complete.png").toExternalForm());
 
@@ -43,7 +44,8 @@ public class MainMenu {
 		     	
 		playBtn.setOnAction(e -> {
 			
-			scene.setRoot(Adventure.getScreen());
+			stage.setScene(new Scene(Adventure.getScreen(stage), 930, 600));
+
 		});
 		
 		root.getChildren().add(playBtn);

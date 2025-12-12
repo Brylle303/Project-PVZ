@@ -60,7 +60,7 @@ public class Main extends Application {
         skipButton.setOnAction(e -> {
             engine.setOnAlert(null);      
             webView.getEngine().load(null); 
-            Platform.runLater(() -> scene.setRoot(MainMenu.getScreen(scene)));
+            Platform.runLater(() -> scene.setRoot(MainMenu.getScreen(stage)));
         });
 
 
@@ -70,7 +70,7 @@ public class Main extends Application {
         engine.setOnAlert(event -> {
             if ("videoFinished".equals(event.getData())) {
                 engine.setOnAlert(null);
-                Platform.runLater(() -> scene.setRoot(MainMenu.getScreen(scene)));
+                Platform.runLater(() -> scene.setRoot(MainMenu.getScreen(stage)));
             }
         });
 

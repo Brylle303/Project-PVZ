@@ -17,6 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class Adventure {
 	private static long[] laneCooldowns = new long[5];  
 	private static final long LANE_COOLDOWN_NS = 10000000000L; 
 	
-	public static AnchorPane getScreen() {
+	public static AnchorPane getScreen(Stage stage) {
 
 		final AnchorPane root = new AnchorPane();
 
@@ -66,7 +67,7 @@ public class Adventure {
 		exitButton.setFont(font);
 		exitButton.setPrefWidth(90);
 		exitButton.setPrefHeight(50);
-		exitButton.setLayoutX(780);
+		exitButton.setLayoutX(800);
 		exitButton.setLayoutY(20);
 		exitButton.setOnAction(e -> {
 			WavPlayer.stop();
@@ -102,15 +103,18 @@ public class Adventure {
 
 		    Timeline moveTimeline = new Timeline(new KeyFrame(Duration.millis(50), ev -> {
 		        zombie.setX(zombie.getX() - 2);
+		        if (zombie.getX() <= 30) {
+		            
+		        	WavPlayer.stop();
 
+		            Platform.runLater(() -> stage.setScene(GameOver.getGameOverScene(stage)));
+		        }
+
+		        
 		    }));
 		    moveTimeline.setCycleCount(Timeline.INDEFINITE);
 		    moveTimeline.play();
-	        if (zombie.getX() <= 0) {
-	            root.getChildren().remove(zombie.getImageView());
-	            root.getChildren().add(gameOver);
-	            moveTimeline.stop();
-	        }
+
 
 		}));
 
