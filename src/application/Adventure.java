@@ -4,6 +4,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
@@ -21,7 +23,7 @@ import java.util.ArrayList;
 
 public class Adventure {
 
-	private static final double[] LANE_Y = { 110, 220, 320, 420, 520 }; // tweak to match lawn
+	private static final double[] LANE_Y = { 110, 220, 320, 420, 520 }; // Just adjust this if u adjust lawn
 
 	// Plants list
 	private static ArrayList<Plant> plants = new ArrayList<>();
@@ -34,6 +36,10 @@ public class Adventure {
 		return LANE_Y[lane] - offset;
 	}
 
+	// Just to make sure the game doesnt spam zombies in a single lane lol
+	private static long[] laneCooldowns = new long[5];  
+	private static final long LANE_COOLDOWN_NS = 10000000000L; 
+	
 	public static AnchorPane getScreen() {
 
 		final AnchorPane root = new AnchorPane();
@@ -47,6 +53,13 @@ public class Adventure {
 				new BackgroundSize(100, 100, true, true, true, true));
 		root.setBackground(new Background(bg));
 
+		// Game Over Screen
+		
+		ImageView gameOver = new ImageView(new Image(Adventure.class.getResource("/Assets/Game Over.png").toExternalForm()));
+		gameOver.setLayoutX((root.getWidth() - gameOver.getFitWidth()) / 2);
+		gameOver.setLayoutY((root.getHeight() - gameOver.getFitHeight()) / 2);
+		
+		
 		// Exit button
 		Button exitButton = new Button("EXIT");
 		Font font = Font.font("Courier New", FontWeight.BOLD, 18);
@@ -65,31 +78,42 @@ public class Adventure {
 		WavPlayer.play("src/Assets/LawnMusic.wav", true);
 
 		// ----- Zombie Spawning -----
-		Timeline spawnTimeline = new Timeline(new KeyFrame(Duration.seconds(3), e -> {
+		Timeline spawnTimeline = new Timeline(new KeyFrame(Duration.seconds(5), e -> {
 
-			int lane = (int) (Math.random() * LANE_Y.length);
+		    long now = System.nanoTime();
 
-			Zombie zombie;
-			if (Math.random() < 0.3) {
-				zombie = new ConeZombie();
-			} else {
-				zombie = new Zombie("/Assets/walking-zombie.gif", 170, 340);
-			}
+		    int lane;
+		    do {
+		        lane = (int) (Math.random() * LANE_Y.length);
+		    } while (now - laneCooldowns[lane] < LANE_COOLDOWN_NS); // pick another if lane is still cooling down
 
-			zombie.setX(930);
-			zombie.setY(getLaneY(lane, zombie));
-			root.getChildren().add(zombie.getImageView());
+		    laneCooldowns[lane] = now; // lock lane
 
-			Timeline moveTimeline = new Timeline(new KeyFrame(Duration.millis(50), ev -> {
-				zombie.setX(zombie.getX() - 0.5);
-				if (zombie.getX() <= 0) {
-					root.getChildren().remove(zombie.getImageView());
-				}
-			}));
-			moveTimeline.setCycleCount(Timeline.INDEFINITE);
-			moveTimeline.play();
+		    Zombie zombie;
+		    if (Math.random() < 0.1) {
+		        zombie = new ConeZombie();
+		    } else {
+		        zombie = new Zombie("/Assets/walking-zombie.gif", 170, 340);
+		    }
+
+		    zombie.setX(920);
+		    zombie.setY(getLaneY(lane, zombie));
+		    root.getChildren().add(zombie.getImageView());
+
+		    Timeline moveTimeline = new Timeline(new KeyFrame(Duration.millis(50), ev -> {
+		        zombie.setX(zombie.getX() - 2);
+
+		    }));
+		    moveTimeline.setCycleCount(Timeline.INDEFINITE);
+		    moveTimeline.play();
+	        if (zombie.getX() <= 0) {
+	            root.getChildren().remove(zombie.getImageView());
+	            root.getChildren().add(gameOver);
+	            moveTimeline.stop();
+	        }
 
 		}));
+
 		spawnTimeline.setCycleCount(Timeline.INDEFINITE);
 		spawnTimeline.play();
 
@@ -123,7 +147,7 @@ public class Adventure {
 			int lane = (int) ((mouseY - yOffset) / cellHeight);
 
 			if (col < 0 || col >= cols || lane < 0 || lane >= rows)
-				return; // out of bounds
+				return;
 
 			double plantX = xOffset + col * cellWidth;
 			double plantY = yOffset + lane * cellHeight;
@@ -134,7 +158,7 @@ public class Adventure {
 		});
 
 		// ----- Pea Shooting -----
-		Timeline peaTimeline = new Timeline(new KeyFrame(Duration.millis(5000), e -> { // fire every 0.5s
+		Timeline peaTimeline = new Timeline(new KeyFrame(Duration.millis(5000), e -> {
 		    for (Plant plant : plants) {
 		        if (plant instanceof Peashooter) {
 		            Pea pea = ((Peashooter) plant).shoot();
@@ -153,7 +177,7 @@ public class Adventure {
 		    ArrayList<Pea> toRemove = new ArrayList<>();
 		    for (Pea pea : activePeas) {
 		        pea.move();
-		        if (pea.getNode().getLayoutX() > 1000) { // if it goes off-screen
+		        if (pea.getNode().getLayoutX() > 900) {
 		            root.getChildren().remove(pea.getNode());
 		            toRemove.add(pea);
 		        }

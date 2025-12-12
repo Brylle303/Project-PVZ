@@ -1,6 +1,7 @@
 package application;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -55,16 +56,21 @@ public class Main extends Application {
         skipButton.setLayoutX(830);
         skipButton.setLayoutY(10);
 
+        // If you're bored of seeing the intro video you can use this button to go straight to main menu
         skipButton.setOnAction(e -> {
-            scene.setRoot(MainMenu.getScreen(scene)); // go to adventure immediately
+            engine.setOnAlert(null);      
+            webView.getEngine().load(null); 
+            Platform.runLater(() -> scene.setRoot(MainMenu.getScreen(scene)));
         });
+
 
         root.getChildren().add(skipButton);
 
-        // Video finished alert
+        // This automatically switches to the main menu after the intro video
         engine.setOnAlert(event -> {
             if ("videoFinished".equals(event.getData())) {
-                scene.setRoot(MainMenu.getScreen(scene)); // load adventure after video
+                engine.setOnAlert(null);
+                Platform.runLater(() -> scene.setRoot(MainMenu.getScreen(scene)));
             }
         });
 
