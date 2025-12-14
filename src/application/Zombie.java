@@ -1,49 +1,51 @@
 package application;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
-public class Zombie {
-  protected int health;
-  protected double coordinates;
-  protected ImageView imageView;
+public abstract class Zombie extends GameObject{
+	
+	private Timeline eatTimeline;
+	public boolean isEating = false;
+	
+	public Zombie(double x, double y, double inpHealth, double inpDamage, double inpSpeed, double inpWidth, double inpHeight, String inpEntityName, String gifPath) {
+		super(x, y, inpHealth, inpDamage, inpSpeed, inpWidth, inpHeight, inpEntityName, gifPath);
+		//this.setX(x);
+		//this.setY(y);
+	}
+	@Override
+	public void move() {
+		if(!(this.isEating)) {
+		this.x -= this.speed;
+		this.setX(this.x);
+		}
+	}
+	 
+	
+    public void startEating(Plant plant) {
+        if (isEating) return;
 
-  protected double width = 70;
-  protected double height = 90;
+        isEating = true;
 
-//  public Zombie(String gifPath) {
-//    imageView = new ImageView(new Image(getClass().getResource(gifPath).toExternalForm()));
-//    imageView.setFitWidth(500);
-//    imageView.setFitHeight(700);
-//    imageView.setPreserveRatio(true);
-//    health = 100; // default health
-//  }
-  
-  public Zombie(String gifPath, double width, double height) {
-	    imageView = new ImageView(new Image(getClass().getResource(gifPath).toExternalForm()));
-	    imageView.setFitWidth(width);
-	    imageView.setFitHeight(height);
-	    imageView.setPreserveRatio(true);
-	    health = 100; // default health
-	  }
+        eatTimeline = new Timeline(new KeyFrame(Duration.millis(800), e -> {
+            
+        	if (plant.isAlive) {
+                plant.takeDamage(damage);
+            } else {
+                stopEating();
+            }
+        }));
+        eatTimeline.setCycleCount(Timeline.INDEFINITE);
+        eatTimeline.play();
+    }
 
-  public ImageView getImageView() {
-    return imageView;
-  }
+    public void stopEating() {
+        isEating = false;
+        if (eatTimeline != null) {
+            eatTimeline.stop();
+            eatTimeline = null;
+        }
+    }
 
-  public double getX() {
-    return imageView.getLayoutX();
-  }
-
-  public void setX(double x) {
-    imageView.setLayoutX(x);
-  }
-
-  public double getY() {
-    return imageView.getLayoutY();
-  }
-
-  public void setY(double y) {
-    imageView.setLayoutY(y);
-  }
 }

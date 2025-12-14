@@ -19,12 +19,13 @@ public class GameOver {
 
 	    ImageView gameOver = new ImageView(new Image(GameOver.class.getResource("/Assets/Game Over.png").toExternalForm()));
 	    
-	    gameOver.setFitHeight(500);
 	    gameOver.setFitWidth(500);
-	    
-	    gameOver.setLayoutX( (930 - gameOver.getImage().getWidth()) / 2 );
-	    gameOver.setLayoutY( (600 - gameOver.getImage().getHeight()) / 2 );
+	    gameOver.setFitHeight(500);
 
+	    gameOver.setLayoutX((920 - 500) / 2);
+	    gameOver.setLayoutY((600 - 500) / 2);
+
+	    
 		Button exitButton = new Button("EXIT");
 		Font font = Font.font("Courier New", FontWeight.BOLD, 18);
 		exitButton.setFont(font);
@@ -34,11 +35,12 @@ public class GameOver {
 		exitButton.setLayoutY(500);
 	    
 		exitButton.setOnAction(e -> {
+			Adventure.cleanup();
 			Platform.exit();
 		});
 		
-	    root.getChildren().add(exitButton);
 	    root.getChildren().add(gameOver);
+	    root.getChildren().add(exitButton);
 
 	    return new Scene(root, 930, 600);
 	}

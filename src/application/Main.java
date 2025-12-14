@@ -38,10 +38,10 @@ public class Main extends Application {
 
         engine.loadContent(html);
 
-        webView.setPrefSize(930, 600);
+        webView.setPrefSize(920, 600);
 
         AnchorPane root = new AnchorPane(webView);
-        Scene scene = new Scene(root, 930, 600);
+        Scene scene = new Scene(root, 920, 600);
         Image icon = new Image(getClass().getResource("/Assets/Logo.png").toExternalForm());
 
         stage.getIcons().add(icon);
@@ -53,7 +53,7 @@ public class Main extends Application {
         Button skipButton = new Button("SKIP");
         skipButton.setPrefWidth(60);
         skipButton.setPrefHeight(30);
-        skipButton.setLayoutX(830);
+        skipButton.setLayoutX(850);
         skipButton.setLayoutY(10);
 
         // If you're bored of seeing the intro video you can use this button to go straight to main menu
